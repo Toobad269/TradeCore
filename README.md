@@ -1,5 +1,12 @@
 # TradeCore — Minecraft Economy & Marketplace
 
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-55AA55)](https://papermc.io/)
+![Java](https://img.shields.io/badge/Java-21-orange)
+![Paper](https://img.shields.io/badge/Platform-Paper-blue)
+![Status](https://img.shields.io/badge/Status-Testing-yellow)
+
+**Keywords:** Minecraft economy plugin · Minecraft shop plugin · Paper 1.21.11 · Java plugin · chest shops · auction house · server economy · SQLite · Vault · Bedrock / Floodgate · HTTP API
+
 **TradeCore** is an economy and marketplace plugin for Minecraft Paper. It combines SQLite-backed accounts, player transfers, a central server shop, physically stocked chest shops, fixed-price auctions, a pickup mailbox, optional Bedrock menus, Vault compatibility and an HTTP administration API.
 
 **Target:** Paper **1.21.11**, Java **21**. Folia and other Minecraft versions are unsupported.
