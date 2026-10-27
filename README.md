@@ -49,7 +49,7 @@ Renaming any of those requires a separate migration and compatibility review, no
 
 ## Project status
 
-This repository is being prepared from a supplied source archive. **The source files are not yet committed here**; use the complete source archive provided separately before attempting a build. No precompiled JAR is provided. Rebranding and translations have not been validated in a live server; run tests and confirm behavior before production use.
+The Java source code is committed to this repository. No precompiled JAR is provided; build the plugin using Maven as described above. Rebranding and translations have not yet been validated on a live Paper server, so run the tests and verify compatibility before production use.
 
 The original archive includes detailed German documentation that must still be translated and verified. Security-sensitive operations, especially the HTTP API and inventory recovery, should be reviewed in that reference before deployment.
 
