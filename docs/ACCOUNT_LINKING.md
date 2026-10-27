@@ -1,7 +1,7 @@
 # Optional integration idea: Link a Minecraft account to a website
 
 > **Design suggestion, not an implemented TradeCore feature.**
-> This workflow was proposed for the ABYSS Minecraft network and may be useful for servers integrating TradeCore with a website.
+> This workflow is a general suggestion for Minecraft servers integrating TradeCore with a website.
 
 ## Goal
 
