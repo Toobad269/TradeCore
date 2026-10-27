@@ -1,0 +1,28 @@
+name: TradeCore
+version: 1.0.0
+main: de.marktwerk.MarktWerk
+api-version: '1.21.11'
+softdepend: [Vault, floodgate, Geyser-Spigot]
+commands:
+  markt:
+    description: Economy menu and administration
+    usage: /markt
+permissions:
+  marktwerk.use:
+    default: true
+  marktwerk.transfer:
+    default: true
+  marktwerk.server:
+    default: true
+  marktwerk.chest:
+    default: true
+  marktwerk.auction:
+    default: true
+  marktwerk.claim:
+    default: true
+  marktwerk.vote:
+    default: true
+  marktwerk.api:
+    default: true
+  marktwerk.admin:
+    default: op
