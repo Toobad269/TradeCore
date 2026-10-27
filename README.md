@@ -57,6 +57,14 @@ The original archive includes detailed German documentation that must still be t
 
 Restrict the management API with authentication and network controls. Use an appropriate chest/land protection plugin and back up the SQLite database before updates.
 
-## License
+## License and contributions
 
-Copyright © 2026 TradeCore. All rights reserved. TradeCore is an independently developed Minecraft economy plugin. The source code is publicly available for viewing, but redistribution, modification, and commercial use require the author's permission.
+Copyright © 2026 TradeCore contributors. Project maintained by Toobad269.
+
+**Free use and modification are allowed.** You may download, use, run and modify TradeCore for your own Minecraft servers and personal projects, including servers that accept donations or sell unrelated in-game services.
+
+**Reselling TradeCore is not allowed.** You may not sell the plugin, its source code, or a modified/rebranded version as your own paid product, nor charge for access to a competing derivative distribution.
+
+You are welcome to suggest improvements: fork the project and open a **pull request** to share your changes for review. Pull requests are proposals, not automatic acceptance.
+
+These are the maintainer's intended permissions and restrictions. A formal LICENSE file with precise legal terms has not yet been adopted; please contact the maintainer for redistribution or commercial-licensing questions.
