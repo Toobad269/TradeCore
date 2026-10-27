@@ -59,4 +59,4 @@ Restrict the management API with authentication and network controls. Use an app
 
 ## License
 
-No license file was included in the original archive. All rights remain reserved until the relevant copyright owner adds an explicit license.
+Copyright © 2026 TradeCore. All rights reserved. TradeCore is an independently developed Minecraft economy plugin. The source code is publicly available for viewing, but redistribution, modification, and commercial use require the author's permission.
