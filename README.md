@@ -55,6 +55,9 @@ The original archive includes detailed German documentation that must still be t
 
 ## Security
 
+For a secure website-to-Minecraft account verification workflow, see the [Account Linking Security Guide](docs/ACCOUNT_LINKING.md). This is a proposed integration pattern, not a claim that TradeCore implements it automatically.
+
+
 Restrict the management API with authentication and network controls. Use an appropriate chest/land protection plugin and back up the SQLite database before updates.
 
 ## License and contributions
