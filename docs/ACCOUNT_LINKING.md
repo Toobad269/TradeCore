@@ -2,6 +2,8 @@
 
 > **Design suggestion, not an implemented TradeCore feature.**
 > This workflow is a general suggestion for Minecraft servers integrating TradeCore with a website.
+>
+> **Background:** When I originally came up with this account-linking approach, I was not aware of other Minecraft verification methods or projects offering similar functionality. I later learned that comparable solutions already exist. I do not claim to have invented this verification concept or to be the first to implement it.
 
 ## Goal
 
