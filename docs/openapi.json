@@ -1,0 +1,3525 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MarktWerk Shop-Verwaltung",
+    "version": "1.0.0",
+    "description": "Keine Website, keine Käufe oder Item-Ausgaben. Alle Auth-Anfragen benötigen einen online befindlichen Spieler mit aktuellen Berechtigungen. Beträge in ganzzahligen Untereinheiten. Keine Query-Parameter. API standardmäßig deaktiviert."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787/api/v1",
+      "description": "Nur lokale Entwicklung; extern ausschließlich HTTPS-Reverse-Proxy"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/link": {
+      "post": {
+        "summary": "Einmalcode atomar gegen Zugangstoken tauschen",
+        "operationId": "post__link",
+        "responses": {
+          "201": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "tokenType": {
+                      "const": "Bearer"
+                    },
+                    "expiresAt": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "accessToken": "nur-in-dieser-Antwort-sichtbar",
+                  "tokenType": "Bearer",
+                  "expiresAt": 1793106000
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "maxLength": 80
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "summary": "Eigenes Profil und Guthaben",
+        "operationId": "get__profile",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                },
+                "example": {
+                  "id": "11111111-1111-1111-1111-111111111111",
+                  "name": "Alice",
+                  "balance": 10000,
+                  "income": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shops": {
+      "get": {
+        "summary": "Alle eigenen Shops",
+        "operationId": "get__shops",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Shop"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shops/{shopId}": {
+      "get": {
+        "summary": "Shop mit seinen Angeboten",
+        "operationId": "get__shops_shopId",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "shop": {
+                      "$ref": "#/components/schemas/Shop"
+                    },
+                    "offers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Offer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "Shop-Titel ändern",
+        "operationId": "put__shops_shopId",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "example": {
+                  "version": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "title"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            },
+            "example": "\"3\"",
+            "description": "Gemeinsame Shop- und Layout-Version. Für alle Änderungen erforderlich."
+          }
+        ]
+      }
+    },
+    "/shops/{shopId}/layout": {
+      "get": {
+        "summary": "Layout als strukturiertes Modell abrufen",
+        "operationId": "get__shops_shopId_layout",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Layout"
+                },
+                "example": {
+                  "mode": "SIMPLE",
+                  "pages": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "Layout ersetzen; alle Seiten, Felder und Navigation serverseitig validieren",
+        "operationId": "put__shops_shopId_layout",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "example": {
+                  "version": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Layout"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            },
+            "example": "\"3\"",
+            "description": "Gemeinsame Shop- und Layout-Version. Für alle Änderungen erforderlich."
+          }
+        ]
+      }
+    },
+    "/shops/{shopId}/offers": {
+      "post": {
+        "summary": "Sichtbares oder verborgenes Angebot aus einer Vorlage erstellen; erzeugt keine Items",
+        "operationId": "post__shops_shopId_offers",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "example": {
+                  "version": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferWrite"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            },
+            "example": "\"3\"",
+            "description": "Gemeinsame Shop- und Layout-Version. Für alle Änderungen erforderlich."
+          }
+        ]
+      }
+    },
+    "/shops/{shopId}/offers/{offerId}": {
+      "put": {
+        "summary": "Angebot ersetzen, Preis und Sichtbarkeit ändern",
+        "operationId": "put__shops_shopId_offers_offerId",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "example": {
+                  "version": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferWrite"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            },
+            "example": "\"3\"",
+            "description": "Gemeinsame Shop- und Layout-Version. Für alle Änderungen erforderlich."
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Angebot entfernen; Layout wird auf SIMPLE zurückgesetzt",
+        "operationId": "delete__shops_shopId_offers_offerId",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "example": {
+                  "version": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[1-9][0-9]*\"$"
+            },
+            "example": "\"3\"",
+            "description": "Gemeinsame Shop- und Layout-Version. Für alle Änderungen erforderlich."
+          }
+        ]
+      }
+    },
+    "/shops/{shopId}/stock": {
+      "get": {
+        "summary": "Nur beobachtete Kistenbestände; keine Chunk-Ladung",
+        "operationId": "get__shops_shopId_stock",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "loaded": {
+                      "type": "boolean"
+                    },
+                    "observedAt": {
+                      "type": "integer"
+                    },
+                    "offers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "offerId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "quantity": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "loaded": false,
+                  "observedAt": 1793102400,
+                  "offers": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/shops/{shopId}/income": {
+      "get": {
+        "summary": "Letzte 200 Verkaufseinnahmen dieses Shops",
+        "operationId": "get__shops_shopId_income",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Income"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/income": {
+      "get": {
+        "summary": "Letzte 200 positive Kontobuchungen",
+        "operationId": "get__income",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Income"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tokens/current": {
+      "delete": {
+        "summary": "Aktuelles Token widerrufen",
+        "operationId": "delete__tokens_current",
+        "responses": {
+          "204": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tokens": {
+      "delete": {
+        "summary": "Alle eigenen Tokens und Einmalcodes widerrufen",
+        "operationId": "delete__tokens",
+        "responses": {
+          "204": {
+            "description": "Erfolgreich",
+            "headers": {
+              "ETag": {
+                "description": "Shop-Version, wenn zutreffend",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ungültiges JSON, If-Match oder unerlaubte Query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INVALID_JSON",
+                  "message": "Ungültiges JSON, If-Match oder unerlaubte Query"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token oder Einmalcode ungültig oder abgelaufen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "TOKEN_INVALID",
+                  "message": "Token oder Einmalcode ungültig oder abgelaufen"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "PLAYER_OFFLINE_OR_PERMISSION_DENIED",
+                  "message": "Origin abgelehnt oder Spieler offline / Berechtigung fehlt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route nicht vorhanden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Route nicht vorhanden"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version wurde zwischenzeitlich geändert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VERSION_CONFLICT",
+                  "message": "Version wurde zwischenzeitlich geändert"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Maximal 32768 Bytes im Request-Body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "BODY_TOO_LARGE",
+                  "message": "Maximal 32768 Bytes im Request-Body"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type application/json erforderlich",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "JSON_REQUIRED",
+                  "message": "Content-Type application/json erforderlich"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "VALIDATION_ERROR",
+                  "message": "Validierungsfehler; Eintrag fehlt oder gehört nicht zum Spieler"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match fehlt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "IF_MATCH_REQUIRED",
+                  "message": "If-Match fehlt"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-Limit; Retry-After: 60",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "RATE_LIMIT",
+                  "message": "Rate-Limit; Retry-After: 60"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interner Fehler; keine Details oder Geheimnisse in der Antwort",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "INTERNAL_ERROR",
+                  "message": "Interner Fehler; keine Details oder Geheimnisse in der Antwort"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server-Hauptthread antwortet nicht rechtzeitig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "SERVER_BUSY",
+                  "message": "Server-Hauptthread antwortet nicht rechtzeitig"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Spielcode im Menü erzeugen, POST /link; 256-Bit-Token, nur SHA-256-Hash serverseitig gespeichert."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "message"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "OfferWrite": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quantity",
+          "priceMinor",
+          "visible"
+        ],
+        "properties": {
+          "material": {
+            "type": "string",
+            "example": "DIAMOND"
+          },
+          "templateOfferId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Alternative zu material: exakte Item-Vorlage aus einem eigenen Angebot; keine freie Item-NBT-Eingabe."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "priceMinor": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9000000000000000
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "material"
+            ]
+          },
+          {
+            "required": [
+              "templateOfferId"
+            ]
+          }
+        ]
+      },
+      "Layout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mode",
+          "pages"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "SIMPLE",
+              "CUSTOM"
+            ]
+          },
+          "pages": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/Page"
+            }
+          }
+        }
+      },
+      "Page": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "fields"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,40}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "fields": {
+            "type": "array",
+            "maxItems": 45,
+            "items": {
+              "$ref": "#/components/schemas/Field"
+            }
+          }
+        }
+      },
+      "Field": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slot",
+          "icon",
+          "label",
+          "action"
+        ],
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 44
+          },
+          "icon": {
+            "type": "string",
+            "example": "DIAMOND"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "DECORATION",
+              "BUY_OFFER",
+              "OPEN_PAGE",
+              "CLOSE",
+              "HOME"
+            ]
+          },
+          "offerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetPage": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "integer",
+            "description": "Untereinheiten, 100 = 1 Taler"
+          },
+          "income": {
+            "type": "integer",
+            "description": "Kumulierte positive Buchungen; keine Nettogewinnrechnung"
+          }
+        }
+      },
+      "Version": {
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "Offer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shop": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "item": {
+            "type": "string",
+            "description": "Opake serverseitige Vorlage. Nur lesen; beim Schreiben material oder templateOfferId verwenden."
+          },
+          "material": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "visible": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        }
+      },
+      "Shop": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "owner": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "world": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x": {
+            "type": "integer"
+          },
+          "y": {
+            "type": "integer"
+          },
+          "z": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "layout": {
+            "type": "string",
+            "description": "JSON serialisiert; /layout liefert dasselbe Modell als JSON-Objekt."
+          }
+        }
+      },
+      "Income": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "delta": {
+              "type": "integer"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "at": {
+              "type": "integer",
+              "description": "Unixsekunden"
+            },
+            "operation": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

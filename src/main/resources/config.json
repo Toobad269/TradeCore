@@ -1,0 +1,100 @@
+{
+  "modules": {
+    "serverShop": true,
+    "chestShops": true,
+    "auctionHouse": true,
+    "httpApi": false,
+    "bedrockForms": true,
+    "menuItem": true,
+    "supplierBonus": true,
+    "rarityPrices": false,
+    "playerVotes": false,
+    "stockPrices": false,
+    "vault": true
+  },
+  "currency": {
+    "singular": "Taler",
+    "plural": "Taler",
+    "startingMinor": 10000,
+    "serverInitialMinor": 100000000,
+    "allowMinting": false
+  },
+  "menu": {
+    "material": "COMPASS",
+    "name": "§6MarktWerk",
+    "lore": [
+      "§7Your economy menu"
+    ],
+    "preferredSlot": 8
+  },
+  "serverShop": {
+    "bonusBps": 500,
+    "manual": {
+      "DIRT": {
+        "buyMinor": 1,
+        "sellMinor": 10,
+        "bonusBps": 500
+      },
+      "COBBLESTONE": {
+        "buyMinor": 1,
+        "sellMinor": 12,
+        "bonusBps": 500
+      },
+      "DIAMOND": {
+        "buyMinor": 100,
+        "sellMinor": 1000,
+        "bonusBps": 500
+      }
+    }
+  },
+  "pricing": {
+    "referenceStock": 1024,
+    "strengthBps": 5000,
+    "minFactorBps": 5000,
+    "maxFactorBps": 20000,
+    "minMinor": 1,
+    "maxMinor": 100000000,
+    "maxQuantity": 4096
+  },
+  "votes": {
+    "windowSeconds": 86400,
+    "cooldownSeconds": 3600,
+    "minParticipants": 5,
+    "stepBps": 200,
+    "minFactorBps": 8000,
+    "maxFactorBps": 12000,
+    "excluded": []
+  },
+  "auctions": {
+    "durationSeconds": 86400,
+    "maxDurationSeconds": 604800,
+    "listingFeeMinor": 10,
+    "saleFeeBps": 200,
+    "limit": 20
+  },
+  "api": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "allowedOrigins": [],
+    "codeSeconds": 120,
+    "tokenSeconds": 3600,
+    "requestsPerMinute": 60,
+    "codeAttemptsPerMinute": 5
+  },
+  "messages": {
+    "success": "Vorgang abgeschlossen. Waren findest du im Abholfach.",
+    "error": "Vorgang abgelehnt: ",
+    "busy": "An Operation Is in Progress or Requires Review.",
+    "unavailable": "Diese Funktion ist deaktiviert oder nicht freigegeben.",
+    "full": "Dein Inventar ist voll. Bitte schaffe Platz.",
+    "recovery": "Vorgang gesperrt. Bitte informiere einen Administrator.",
+    "disabled": "Your Menu Item Was Disabled.",
+    "stale": "This Listing Has Changed. Please Reopen It."
+  },
+  "items": {
+    "excludedMaterials": [],
+    "serverExcluded": [],
+    "chestExcluded": [],
+    "auctionExcluded": []
+  }
+}

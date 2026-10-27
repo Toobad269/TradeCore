@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: de.marktwerk.EconomyTest
+-------------------------------------------------------------------------------
+Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.913 s -- in de.marktwerk.EconomyTest
